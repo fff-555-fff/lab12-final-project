@@ -1,0 +1,59 @@
+# ==========================================================
+# Docker Compose — Lab 12 Final Project
+# Deploys: Personal Website + Todo App
+# ==========================================================
+
+version: '3.8'
+
+services:
+  # ===== 个人网站 =====
+  personal-website:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME:-3254884209}/personal-website:latest
+    container_name: personal-website
+    ports:
+      - "8080:80"
+    networks:
+      - lab12-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # ===== Todo 应用（后续添加） =====
+  # todo-app:
+  #   build:
+  #     context: ./todo-app
+  #   container_name: todo-app
+  #   ports:
+  #     - "8081:3000"
+  #   networks:
+  #     - lab12-network
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - todo-db
+
+  # todo-db:
+  #   image: postgres:16-alpine
+  #   container_name: todo-db
+  #   environment:
+  #     POSTGRES_DB: todos
+  #     POSTGRES_USER: todo
+  #     POSTGRES_PASSWORD: ${TODO_DB_PASSWORD:-changeme}
+  #   volumes:
+  #     - todo-db-data:/var/lib/postgresql/data
+  #   networks:
+  #     - lab12-network
+  #   restart: unless-stopped
+
+networks:
+  lab12-network:
+    driver: bridge
+
+volumes:
+  todo-db-data:
