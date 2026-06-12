@@ -1,12 +1,12 @@
 # ==========================================================
 # Docker Compose — Lab 12 Final Project
-# Deploys: Personal Website + Todo App
+# Deploys: Personal Website + Todo App (MySQL)
 # ==========================================================
 
 version: '3.8'
 
 services:
-  # ===== 个人网站 =====
+  # ===== 1. 个人网站 =====
   personal-website:
     build:
       context: .
@@ -25,31 +25,45 @@ services:
       retries: 3
       start_period: 5s
 
-  # ===== Todo 应用（后续添加） =====
-  # todo-app:
-  #   build:
-  #     context: ./todo-app
-  #   container_name: todo-app
-  #   ports:
-  #     - "8081:3000"
-  #   networks:
-  #     - lab12-network
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - todo-db
+  # ===== 2. Todo 应用 =====
+  todo-app:
+    build:
+      context: ./todo-app
+      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME:-3254884209}/todo-app:latest
+    container_name: todo-app
+    ports:
+      - "8081:3000"
+    environment:
+      MYSQL_HOST: todo-db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${TODO_DB_PASSWORD:-secret}
+      MYSQL_DB: todos
+    networks:
+      - lab12-network
+    restart: unless-stopped
+    depends_on:
+      todo-db:
+        condition: service_healthy
 
-  # todo-db:
-  #   image: postgres:16-alpine
-  #   container_name: todo-db
-  #   environment:
-  #     POSTGRES_DB: todos
-  #     POSTGRES_USER: todo
-  #     POSTGRES_PASSWORD: ${TODO_DB_PASSWORD:-changeme}
-  #   volumes:
-  #     - todo-db-data:/var/lib/postgresql/data
-  #   networks:
-  #     - lab12-network
-  #   restart: unless-stopped
+  # ===== 3. MySQL 数据库 =====
+  todo-db:
+    image: mysql:8.0
+    container_name: todo-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${TODO_DB_PASSWORD:-secret}
+      MYSQL_DATABASE: todos
+    volumes:
+      - todo-db-data:/var/lib/mysql
+    networks:
+      - lab12-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 networks:
   lab12-network:
