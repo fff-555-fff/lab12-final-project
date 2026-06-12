@@ -20,8 +20,8 @@
 
 | Application | URL | Port |
 |-------------|-----|------|
-| Personal Website | `http://localhost:8080` | 8080 |
-| Todo App | `http://localhost:8081` | 8081 |
+| Personal Website | [http://54.208.114.120:8080](http://54.208.114.120:8080) | 8080 |
+| Todo App | [http://54.208.114.120:8081](http://54.208.114.120:8081) | 8081 |
 
 ---
 
